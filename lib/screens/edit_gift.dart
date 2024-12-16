@@ -1,53 +1,44 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-// 'package:image_picker/image_picker.dart';
 import 'package:project/controller/gift_controller.dart';
 
+class EditGiftPage extends StatefulWidget {
+  final Map<String, dynamic> gift;
 
-class AddGiftPage extends StatefulWidget {
-
-  const AddGiftPage({super.key});
+  const EditGiftPage({super.key, required this.gift});
 
   @override
-  _AddGiftPageState createState() => _AddGiftPageState();
+  _EditGiftPageState createState() => _EditGiftPageState();
 }
 
-class _AddGiftPageState extends State<AddGiftPage> {
+class _EditGiftPageState extends State<EditGiftPage> {
 
   GiftController giftController = GiftController();
 
-  File? _giftImage;
+  @override
+  void initState() {
+    super.initState();
+    giftController.editNameController = TextEditingController(text: widget.gift["name"]);
+    giftController.editCategoryController = TextEditingController(text: widget.gift["category"]);
+    giftController.editDescriptionController = TextEditingController(text: widget.gift["description"]);
+    giftController.editPriceController = TextEditingController(text: widget.gift["price"].toString());
 
-
-  void _addGift() {
-
-    if (giftController.formKey.currentState!.validate()) {
-
-      final newGift = {
-        "name": giftController.nameController.text,
-        "category": giftController.categoryController.text,
-        "description": giftController.descriptionController.text,
-        "price": giftController.priceController.text,
-        "status": "Available",
-        "pledged": false,
-        "imagePath": _giftImage,
-      };
-
-      Navigator.pop(context, newGift);
-    }
   }
 
-  // void _pickImage() async {
-  //   final ImagePicker picker = ImagePicker();
-  //   final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-  //
-  //   if (image != null) {
-  //     setState(() {
-  //       _giftImage = File(image.path);
-  //     });
-  //
-  //   }
-  // }
+  void _saveGift() {
+    if (giftController.editFormKey.currentState!.validate()) {
+
+      final updatedGift = {
+        "name": giftController.editNameController.text,
+        "category": giftController.editCategoryController.text,
+        "description": giftController.editDescriptionController.text,
+        "price": double.parse(giftController.editPriceController.text),
+        "status":  widget.gift['status'],
+        "pledged": widget.gift['pledged'],
+      };
+
+      Navigator.pop(context, updatedGift);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +47,7 @@ class _AddGiftPageState extends State<AddGiftPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // Header Section
             Container(
               height: 300,
               decoration: const BoxDecoration(
@@ -78,7 +70,7 @@ class _AddGiftPageState extends State<AddGiftPage> {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      "Add a New Gift",
+                      "Edit Gift",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 30,
@@ -89,38 +81,16 @@ class _AddGiftPageState extends State<AddGiftPage> {
                 ),
               ),
             ),
-
+            // Form Section
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Form(
-                key: giftController.formKey,
+                key: giftController.editFormKey,
                 child: Column(
                   children: [
-                    // Row(
-                    //   children: [
-                    //     ElevatedButton(
-                    //       style: ElevatedButton.styleFrom(
-                    //         backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
-                    //       ),
-                    //       onPressed:() => _pickImage(),
-                    //       child: const Text(
-                    //         "Upload Image",
-                    //         style: TextStyle(color: Colors.white),
-                    //       ),
-                    //     ),
-                    //     const SizedBox(width: 10),
-                    //     _giftImage != null
-                    //         ? Image.file(
-                    //       _giftImage!,
-                    //       width: 50,
-                    //       height: 50,
-                    //     ) :
-                    //     const Text("No image selected"),
-                    //   ],
-                    // ),
-                    // const SizedBox(height: 20),
+                    // Gift Name Input
                     TextFormField(
-                      controller: giftController.nameController,
+                      controller: giftController.editNameController,
                       decoration: const InputDecoration(
                         labelText: "Gift Name",
                         hintText: "Enter the gift name",
@@ -136,8 +106,9 @@ class _AddGiftPageState extends State<AddGiftPage> {
                     ),
                     const SizedBox(height: 20),
 
+                    // Category Input
                     TextFormField(
-                      controller: giftController.categoryController,
+                      controller: giftController.editCategoryController,
                       decoration: const InputDecoration(
                         labelText: "Category",
                         hintText: "Enter the gift category",
@@ -154,7 +125,7 @@ class _AddGiftPageState extends State<AddGiftPage> {
                     const SizedBox(height: 20),
 
                     TextFormField(
-                      controller: giftController.descriptionController,
+                      controller: giftController.editDescriptionController,
                       decoration: const InputDecoration(
                         labelText: "Description",
                         hintText: "Enter the gift description",
@@ -171,7 +142,7 @@ class _AddGiftPageState extends State<AddGiftPage> {
                     const SizedBox(height: 20),
 
                     TextFormField(
-                      controller: giftController.priceController,
+                      controller: giftController.editPriceController,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         labelText: "Price",
@@ -186,7 +157,6 @@ class _AddGiftPageState extends State<AddGiftPage> {
                         return null;
                       },
                     ),
-
                     const SizedBox(height: 20),
 
                     // Dropdown for Status Selection
@@ -207,9 +177,9 @@ class _AddGiftPageState extends State<AddGiftPage> {
                             border: Border.all(color: Colors.grey),
                             borderRadius: BorderRadius.circular(4.0),
                           ),
-                          child: const Text(
-                            "Available",
-                            style: TextStyle(fontSize: 16),
+                          child: Text(
+                            widget.gift['status'],
+                            style: const TextStyle(fontSize: 16),
                           ),
                         ),
                       ],
@@ -218,27 +188,28 @@ class _AddGiftPageState extends State<AddGiftPage> {
 
                     const SizedBox(height: 20),
 
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Text("Pledged:",
+                        const Text("Pledged:",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Switch(
-                          value: false,
+                          value: widget.gift['pledged'] == true,
                           onChanged: null, // Disable interaction
                         ),
                         Text(
-                          "No",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          widget.gift['pledged'] == true ? "Yes" : "No",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 20),
 
-                    // Submit Button
+                    // Save Button
                     ElevatedButton(
-                      onPressed: _addGift,
+                      onPressed: _saveGift,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
                         shape: RoundedRectangleBorder(
@@ -246,9 +217,9 @@ class _AddGiftPageState extends State<AddGiftPage> {
                         ),
                       ),
                       child: const Text(
-                        "Add Gift",
+                        "Save Changes",
                         style: TextStyle(
-                          color: Colors.white, // Set text color to white
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -257,6 +228,7 @@ class _AddGiftPageState extends State<AddGiftPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 50),
           ],
         ),
       ),

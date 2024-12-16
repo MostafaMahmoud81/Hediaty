@@ -3,6 +3,7 @@ import '../model/event_model.dart';
 import '../model/gift_model.dart';
 import '../model/shared_prefrence.dart';
 import '../model/user_model.dart';
+import '../services/firebase_service.dart';
 
 class ProfileController {
 
@@ -10,6 +11,7 @@ class ProfileController {
   final EventModel eventModel = EventModel();
   final GiftModel giftModel = GiftModel();
   final SharedPrefrence sharedPrefrence = SharedPrefrence();
+  FirebaseService firebaseService = FirebaseService();
 
   late TextEditingController nameController = TextEditingController();
   late TextEditingController phoneController = TextEditingController();
@@ -67,7 +69,7 @@ class ProfileController {
   }
 
   Future<List<Map<String, String>>> getUserGifts(int id) async {
-    List<Map<String, String>> gifts = await giftModel.getUserGifts(id);
+    List<Map<String, String>> gifts = await firebaseService.getGiftsByUserId(id);
     return gifts;
   }
 
@@ -92,6 +94,15 @@ class ProfileController {
   void saveNotificationPreference(bool isEnabled, int userId) async{
     await sharedPrefrence.saveNotificationPreference(isEnabled, userId);
   }
+
+  Future<void> updateGiftStatusDB(int giftId, String status, bool pledged) async{
+    await giftModel.updateGiftStatus(giftId, status, pledged);
+  }
+
+  Future<void> updateGiftStatusFirebase(int giftId, String status, int eventId, bool pledged) async{
+    await firebaseService.updateGiftStatus(giftId, status, eventId, pledged);
+  }
+
 
 
 }

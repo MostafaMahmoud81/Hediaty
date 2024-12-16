@@ -1,3 +1,4 @@
+import '../services/firebase_service.dart';
 import 'database_helper.dart';
 
 class Userr {
@@ -41,6 +42,7 @@ class Userr {
 
 class UserModel {
   final dbHelper = DatabaseHelper();
+  final fireBase = FirebaseService();
 
   Future<int> insertUser(Userr user) async {
     final db = await dbHelper.database;
@@ -169,6 +171,10 @@ class UserModel {
 
     return result.first['id'] as int;
 
+  }
+
+  Future<void> signOut()async {
+    await fireBase.signOut();
   }
 
 }

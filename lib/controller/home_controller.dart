@@ -26,4 +26,8 @@ class HomeController {
     return result;
   }
 
+  Future<void> signOut()async {
+    await userModel.signOut();
+  }
+
 }

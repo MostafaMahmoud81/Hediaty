@@ -1,76 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:project/controller/event_controller.dart';
 import 'package:project/screens/gift_list.dart';
-
 import 'add_event.dart';
 import 'edit_event.dart';
 
 class EventListPage extends StatefulWidget {
+  final int id;
+  const EventListPage({super.key, required this.id});
+
   @override
   _EventListPageState createState() => _EventListPageState();
 }
 
 
 class _EventListPageState extends State<EventListPage> {
-  String _sortCriteria = "Name"; // Default sort criteria
-  final List<Map<String, dynamic>> _events = [
-    {
-      "name": "Birthday Party",
-      "category": "Personal",
-      "status": "Upcoming",
-      "gifts": [
-        {"name": "Watch", "category": "Accessory", "status": "Pending"},
-        {"name": "Toy Car", "category": "Kids", "status": "Completed"}
-      ]
-    },
-    {
-      "name": "Wedding Anniversary",
-      "category": "Family",
-      "status": "Current",
-      "gifts": [
-        {"name": "Dinner Set", "category": "Home", "status": "Pending"},
-      ]
-    },
-    {
-      "name": "Conference",
-      "category": "Work",
-      "status": "Past",
-      "gifts": [
-        {"name": "Notebook", "category": "Stationery", "status": "Completed"},
-      ]
-    },
-    {
-      "name": "Team Outing",
-      "category": "Work",
-      "status": "Upcoming",
-      "gifts": [
-        {"name": "T-Shirt", "category": "Apparel", "status": "Pending"},
-      ]
-    },
-    {
-      "name": "Reunion",
-      "category": "Friends",
-      "status": "Past",
-      "gifts": [
-        {"name": "Photo Frame", "category": "Home", "status": "Completed"},
-      ]
-    },
-  ];
+  late int userId;
+  String _sortCriteria = "Name";
+  final EventController eventController = EventController();
+  List<Map<String, dynamic>> events = [];
+
+  @override
+  void initState(){
+    super.initState();
+    userId = widget.id;
+    _getEvents();
+  }
+
+  Future<void> _getEvents() async {
+    List<Map<String, dynamic>> getEvents = await eventController.getUserEvents(userId);
+    setState((){
+      events = getEvents;
+    });
+  }
 
   void _sortEvents(String criteria) {
     setState(() {
       _sortCriteria = criteria;
 
       if (criteria == "Name") {
-        _events.sort((a, b) => a["name"]!.compareTo(b["name"]!));
+        events.sort((a, b) => a["name"]!.compareTo(b["name"]!));
       } else if (criteria == "Category") {
-        _events.sort((a, b) => a["category"]!.compareTo(b["category"]!));
+        events.sort((a, b) => a["category"]!.compareTo(b["category"]!));
       } else if (criteria == "Status") {
         Map<String, int> statusOrder = {
           "Upcoming": 1,
           "Current": 2,
           "Past": 3,
         };
-        _events.sort((a, b) => statusOrder[a["status"]!]!.compareTo(statusOrder[b["status"]!]!));
+        events.sort((a, b) => statusOrder[a["status"]!]!.compareTo(statusOrder[b["status"]!]!));
       }
     });
   }
@@ -84,7 +61,7 @@ class _EventListPageState extends State<EventListPage> {
           children: [
             // Header Section
             Container(
-              height: 250,
+              height: 300,
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/background.png'),
@@ -105,7 +82,7 @@ class _EventListPageState extends State<EventListPage> {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      "Event List",
+                      "Events List",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 30,
@@ -116,7 +93,6 @@ class _EventListPageState extends State<EventListPage> {
                 ),
               ),
             ),
-            // Sort and Add Buttons
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
               child: Row(
@@ -136,7 +112,7 @@ class _EventListPageState extends State<EventListPage> {
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromRGBO(143, 148, 251, 1),
+                      backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -144,12 +120,13 @@ class _EventListPageState extends State<EventListPage> {
                     onPressed: () async {
                       final newEvent = await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => AddEventPage()),
+                        MaterialPageRoute(builder: (context) => const AddEventPage()),
                       );
 
                       if (newEvent != null) {
+                        eventController.addEvent(newEvent, userId);
                         setState(() {
-                          _events.add(newEvent);
+                          _getEvents();
                         });
                       }
                     },
@@ -165,10 +142,10 @@ class _EventListPageState extends State<EventListPage> {
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
-                children: _events.map((event) {
+                children: events.map((event) {
                   return Card(
                     elevation: 5,
-                    margin: EdgeInsets.symmetric(vertical: 10),
+                    margin: const EdgeInsets.symmetric(vertical: 10),
                     child: ListTile(
                       leading: const CircleAvatar(
                         backgroundColor: Color.fromRGBO(143, 148, 251, .6),
@@ -185,23 +162,23 @@ class _EventListPageState extends State<EventListPage> {
                         ),
                       ),
                       subtitle: Text(
-                        "Category: ${event["category"]}\nStatus: ${event["status"]}",
+                        "Category: ${event["category"]}\nStatus: ${event["status"]} \nDate: ${event["date"]} \nLocation: ${event["location"]} \nDescription: ${event["description"]}",
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                       onTap: () async {
-                        // Navigate to GiftListPage when an event is tapped
-                        final List<Map<String, String>> gifts = List<Map<String, String>>.from(event["gifts"]);
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => GiftListPage(
-                              gifts: gifts,
-                              eventName: event["name"]!, // Pass the event name
+                              eventId: event['id'],
+                              eventName: event['name'], // Pass the event name
                             ),
                           ),
                         );
                       },
-                      trailing: PopupMenuButton<String>(
+                      trailing: event['status'] == 'Past'
+                          ? null // Hide trailing menu if event status is "past"
+                          : PopupMenuButton<String>(
                         onSelected: (value) async {
                           if (value == "Edit") {
                             final editedEvent = await Navigator.push(
@@ -212,14 +189,15 @@ class _EventListPageState extends State<EventListPage> {
                             );
 
                             if (editedEvent != null) {
+                              eventController.editEvent(event['id'], editedEvent);
                               setState(() {
-                                int index = _events.indexOf(event);
-                                _events[index] = editedEvent;
+                                _getEvents();
                               });
                             }
                           } else if (value == "Delete") {
+                            await eventController.deleteEvent(event['id']);
                             setState(() {
-                              _events.remove(event);
+                              _getEvents();
                             });
                           }
                         },
@@ -239,27 +217,19 @@ class _EventListPageState extends State<EventListPage> {
                 }).toList(),
               ),
             ),
-            // Back to Home Button
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromRGBO(143, 148, 251, 1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () {
-                  // Navigate back to the home page
-                  Navigator.pop(context);
-                },
-                child: const Text(
-                  "Back to Home",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
+
+            const SizedBox(height: 60),
           ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
+        child: const Icon(
+          Icons.arrow_back,
+          color: Colors.white,
         ),
       ),
     );

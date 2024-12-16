@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:project/controller/profile_controller.dart';
 import 'package:project/screens/pledged_gifts.dart';
 
+import 'event_list.dart';
+
 
 
 class ProfilePage extends StatefulWidget {
@@ -304,93 +306,30 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "My Created Events",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
+              padding: const EdgeInsets.all(10.0),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(height: 10),
-                  ...createdEvents.map((event) {
-                    return Card(
-                      elevation: 5,
-                      margin: const EdgeInsets.symmetric(vertical: 10),
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          backgroundColor: Color.fromRGBO(143, 148, 251, .6),
-                          child: Icon(
-                            Icons.event, // Corrected the icon here
-                            color: Colors.white,
-                          ),
-                        ),
-                        title: Text(
-                          event["name"]!,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[800],
-                          ),
-                        ),
-                        subtitle: Text(
-                          "Category: ${event["category"]}\nStatus: ${event["status"]}",
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ],
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EventListPage(id: userId),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "My Events",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "My Pledged Gifts",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  ...pledgedGifts.map((gift) {
-                    return Card(
-                      elevation: 5,
-                      margin: const EdgeInsets.symmetric(vertical: 10),
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          backgroundColor: Color.fromRGBO(143, 148, 251, .6),
-                          child: Icon(
-                            Icons.account_tree_outlined,
-                            color: Colors.white,
-                          ),
-                        ),
-                        title: Text(
-                          gift["giftName"]!,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[800],
-                          ),
-                        ),
-                        subtitle: Text(
-                          "For Event: ${gift["event"]}",
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(10.0),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
@@ -412,9 +351,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.pop(context);  // Navigate back to the previous screen

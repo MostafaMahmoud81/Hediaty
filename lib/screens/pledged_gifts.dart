@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:project/screens/gift_list.dart';
+
+import 'edit_gift.dart';
 
 class PledgedGiftsPage extends StatefulWidget {
+  const PledgedGiftsPage({super.key});
+
   @override
   _PledgedGiftsPageState createState() => _PledgedGiftsPageState();
 }
@@ -38,67 +41,108 @@ class _PledgedGiftsPageState extends State<PledgedGiftsPage> {
     );
   }
 
-  // void _removeGift(Map<String, dynamic> gift) {
-  //   setState(() {
-  //     pledgedGifts.remove(gift);
-  //   });
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(content: Text("Gift pledge removed successfully!")),
-  //   );
-  // }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text("Pledged Gifts"),
-        backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
-      ),
-      body: ListView.builder(
-        itemCount: pledgedGifts.length,
-        itemBuilder: (context, index) {
-          final gift = pledgedGifts[index];
-
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-            elevation: 5,
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(15),
-              title: Text(
-                gift["name"],
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              height: 300,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/background.png'),
+                  fit: BoxFit.fill,
                 ),
               ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Pledged by: ${gift["friend"]}"),
-                  Text("Due Date: ${gift["dueDate"]}"),
-                  Text("Status: ${gift["status"]}"),
+              child: const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Hedieaty",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      "My Pledged Gifts",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
+              child: Column(
+                children: pledgedGifts.isNotEmpty
+                    ? pledgedGifts.map((gift) {
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    elevation: 5,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(15),
+                      title: Text(
+                        gift["name"],
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Pledged by: ${gift["friend"]}"),
+                          Text("Due Date: ${gift["dueDate"]}"),
+                          Text("Status: ${gift["status"]}"),
+                        ],
+                      ),
+                      trailing: gift["status"] == "Pending"
+                          ? IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _modifyGift(gift),
+                      )
+                          : null,
+                      onTap: gift["status"] == "Pending"
+                          ? () => _modifyGift(gift)
+                          : null,
+                    ),
+                  );
+                }).toList()
+                    : [
+                  const Center(
+                    child: Text(
+                      "No pledged gifts found.",
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                  ),
+                  const SizedBox(height: 50),
                 ],
               ),
-              trailing: gift["status"] == "Pending"
-                  ? IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () => _modifyGift(gift),
-              )
-                  : null,
-              onTap: gift["status"] == "Pending"
-                  ? () => _modifyGift(gift)
-                  : null,
             ),
-          );
-        },
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
         onPressed: () {
-          // Handle adding new pledged gifts or navigate to another page
+          Navigator.pop(context);
         },
-        child: const Icon(Icons.add),
+        backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
+        child: const Icon(
+          Icons.arrow_back,
+          color: Colors.white,
+        ),
       ),
     );
   }
