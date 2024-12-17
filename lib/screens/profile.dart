@@ -341,7 +341,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => PledgedGiftsPage(),
+                      builder: (context) => PledgedGiftsPage(userId: widget.id,),
                     ),
                   );
                 },

@@ -1,35 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:project/controller/gift_controller.dart';
 
 import 'edit_gift.dart';
 
 class PledgedGiftsPage extends StatefulWidget {
-  const PledgedGiftsPage({super.key});
+  final int userId;
+  const PledgedGiftsPage({super.key, required this.userId});
 
   @override
   _PledgedGiftsPageState createState() => _PledgedGiftsPageState();
 }
 
 class _PledgedGiftsPageState extends State<PledgedGiftsPage> {
-  List<Map<String, dynamic>> pledgedGifts = [
-    {
-      "name": "Toy Car",
-      "friend": "John Doe",
-      "dueDate": "2024-12-25",
-      "status": "Pending",
-    },
-    {
-      "name": "Laptop",
-      "friend": "Jane Smith",
-      "dueDate": "2025-01-10",
-      "status": "Pending",
-    },
-    {
-      "name": "Watch",
-      "friend": "Alice Johnson",
-      "dueDate": "2024-11-30",
-      "status": "Completed",
-    },
-  ];
+
+  late int userId;
+  GiftController giftController = GiftController();
+  List<Map<String, dynamic>> pledgedGifts = [];
+
+  // List<Map<String, dynamic>> pledgedGifts = [
+  //   {
+  //     "name": "Toy Car",
+  //     "friend": "John Doe",
+  //     "dueDate": "2024-12-25",
+  //     "status": "Pending",
+  //   },
+  //   {
+  //     "name": "Laptop",
+  //     "friend": "Jane Smith",
+  //     "dueDate": "2025-01-10",
+  //     "status": "Pending",
+  //   },
+  //   {
+  //     "name": "Watch",
+  //     "friend": "Alice Johnson",
+  //     "dueDate": "2024-11-30",
+  //     "status": "Completed",
+  //   },
+  // ];
+
+
+  @override
+  void initState(){
+    super.initState();
+    userId = widget.userId;
+    _getGifts(userId);
+  }
+
+  void _getGifts(int userId) async{
+    List<Map<String, dynamic>> gifts = await giftController.getPledgedGifts(userId);
+    setState((){
+      pledgedGifts = gifts;
+    });
+  }
 
   void _modifyGift(Map<String, dynamic> gift) {
     // Navigate to the gift details page to modify the pledge
@@ -103,18 +125,18 @@ class _PledgedGiftsPageState extends State<PledgedGiftsPage> {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Pledged by: ${gift["friend"]}"),
-                          Text("Due Date: ${gift["dueDate"]}"),
+                          Text("Pledged by: ${gift["pledged_by"]}"),
+                          Text("Due Date: ${gift["due_date"]}"),
                           Text("Status: ${gift["status"]}"),
                         ],
                       ),
-                      trailing: gift["status"] == "Pending"
+                      trailing: gift["status"] != "Purchased"
                           ? IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () => _modifyGift(gift),
                       )
                           : null,
-                      onTap: gift["status"] == "Pending"
+                      onTap: gift["status"] != "Purchased"
                           ? () => _modifyGift(gift)
                           : null,
                     ),

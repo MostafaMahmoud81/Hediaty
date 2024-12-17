@@ -230,5 +230,23 @@ class EventModel {
 
   }
 
+
+  Future<String> getEventDateById(int eventId) async {
+    final db = await dbHelper.database;
+    // Query the database to fetch the date of the event with the given ID
+    final List<Map<String, dynamic>> result = await db.query(
+      'events',
+      columns: ['date'], // Fetch only the date column
+      where: 'id = ?',
+      whereArgs: [eventId],
+    );
+
+      // Return the event date as a string
+    return result.first['date'] as String;
+
+
+  }
+
+
 }
 

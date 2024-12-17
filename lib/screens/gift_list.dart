@@ -20,6 +20,7 @@ class _GiftListPageState extends State<GiftListPage> {
   GiftController giftController = GiftController();
 
   List<Map<String, dynamic>> gifts = [];
+  List<Map<String, dynamic>> filteredGifts = []; // Filtered list to display
   late int eventId;
   late String eventName;
   String _sortCriteria = "Name";
@@ -31,12 +32,19 @@ class _GiftListPageState extends State<GiftListPage> {
     eventId = widget.eventId;
     eventName = widget.eventName;
     _getGifts();
+    filteredGifts = gifts;
+  }
+
+  @override
+  void dispose() {
+    giftController.searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _getGifts() async {
-    List<Map<String, dynamic>> getGifts = await giftController.getEventGifts(eventId);
+    gifts = await giftController.getEventGifts(eventId);
     setState((){
-      gifts = getGifts;
+      filteredGifts = gifts;
     });
   }
 
@@ -56,6 +64,17 @@ class _GiftListPageState extends State<GiftListPage> {
         };
         gifts.sort((a, b) => statusOrder[a["status"]!]!.compareTo(statusOrder[b["status"]!]!));
       }
+    });
+  }
+
+  void _filterGifts(String query) {
+    query.toLowerCase();
+    setState(() {
+      filteredGifts = gifts.where((gift) {
+        String name = gift['name']!.toLowerCase();
+        String category = gift['category']!.toLowerCase();
+        return name.contains(query) || category.contains(query);
+      }).toList();
     });
   }
 
@@ -169,12 +188,34 @@ class _GiftListPageState extends State<GiftListPage> {
                 ),
               ],
             ),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TextField(
+                  controller: giftController.searchController,
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    labelText: 'Search Gifts',
+                    prefixIcon: const Icon(Icons.search, color: Color.fromRGBO(143, 148, 251, 1)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color.fromRGBO(143, 148, 251, 1)),
+                    ),
+                  ),
+                  onChanged:  (String value) {
+                    _filterGifts(value);
+                  },
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
-                children: gifts.map((gift) {
+                children: filteredGifts.map((gift) {
                   // Check if the gift is editable based on pledged status and completion status
-                  bool isEditable = (gift["pledged"] == false && gift["status"] != "Purchased");
+                  bool isEditable = (gift["status"] != "Purchased");
                   return Card(
                     elevation: 5,
                     margin: const EdgeInsets.symmetric(vertical: 10),

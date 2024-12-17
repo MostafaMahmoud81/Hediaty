@@ -11,7 +11,7 @@ class GiftController {
   final TextEditingController categoryController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
-
+  final TextEditingController searchController = TextEditingController();
 
   late TextEditingController editNameController;
   late TextEditingController editCategoryController;
@@ -57,9 +57,27 @@ class GiftController {
   }
 
   Future<void> storeGiftsToFirebase(List<Map<String, dynamic>> gifts, int userId, String eventName) async{
-    await firebaseService.storeGiftsToFirebase(gifts, userId, eventName);
+    await firebaseService.syncGiftsWithFirebase(gifts, userId, eventName);
   }
 
+
+  Future<List<Map<String, String>>> getPledgedGifts(int userId) async {
+
+      // Step 1: Fetch all gifts for the user from Firestore
+      List<Map<String, String>> gifts = await firebaseService.getPledgedGiftsByUserId(userId);
+
+      // Step 2: Iterate through the gifts and add the event_date for each
+      for (var gift in gifts) {
+        String eventId = gift['event_id']!;
+
+          // Fetch the event date from the SQLite database
+          String eventDate = await eventModel.getEventDateById(int.parse(eventId));
+          gift['due_date'] = eventDate; // Add event_date to the gift data
+
+      }
+      return gifts; // Return the combined list
+
+  }
 
 
 

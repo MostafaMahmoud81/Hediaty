@@ -99,8 +99,8 @@ class ProfileController {
     await giftModel.updateGiftStatus(giftId, status, pledged);
   }
 
-  Future<void> updateGiftStatusFirebase(int giftId, String status, int eventId, bool pledged) async{
-    await firebaseService.updateGiftStatus(giftId, status, eventId, pledged);
+  Future<void> updateGiftStatusFirebase(int giftId, String status, int eventId, bool pledged, String friendName) async{
+    await firebaseService.updateGiftStatus(giftId, status, eventId, pledged, friendName);
   }
 
 

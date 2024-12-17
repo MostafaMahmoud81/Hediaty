@@ -331,7 +331,7 @@ class _HomePageState extends State<HomePage> {
                     alignment: Alignment.centerLeft,
                       child: TextField(
                       controller: homeController.searchController,
-                      keyboardType: TextInputType.number,
+                      keyboardType: TextInputType.text,
                       decoration: InputDecoration(
                         labelText: 'Search Friends',
                         prefixIcon: const Icon(Icons.search, color: Color.fromRGBO(143, 148, 251, 1)),
@@ -392,7 +392,7 @@ class _HomePageState extends State<HomePage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => FriendDetailsScreen(friend: friend, id: friend['friendId']),
+                                  builder: (context) => FriendDetailsScreen(friend: friend, friendId: friend['friendId'], currentUserId: userId,),
                                 ),
                               );
                             },
