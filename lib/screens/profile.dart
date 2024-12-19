@@ -19,21 +19,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   final ProfileController profileController = ProfileController();
 
-  bool _isNotificationsEnabled = true;
-
-  late int userId;
-  late String userName = "";
-  late String userEmail = "";
-  late List<Map<String, String>> events = [];
-  late List<Map<String, String>> createdEvents = [];
-  late List<Map<String, String>> gifts = [];
-  late List<Map<String, String>> pledgedGifts = [];
-  Map<String, String> userData = {};
 
   @override
   void initState(){
     super.initState();
-    userId = widget.id;
+    profileController.userId = widget.id;
     _getUserName();
     _getEmail();
     _getEvents();
@@ -44,48 +34,45 @@ class _ProfilePageState extends State<ProfilePage> {
 
 
   void _loadNotificationPreference() async {
-    bool isEnabled = await profileController.loadNotificationPreference(userId);
+    bool isEnabled = await profileController.loadNotificationPreference(profileController.userId);
     setState(() {
-      _isNotificationsEnabled = isEnabled;
+      profileController.isNotificationsEnabled = isEnabled;
     });
   }
 
-  Future<void> _saveNotificationPreference(bool isEnabled) async {
-    profileController.saveNotificationPreference(isEnabled, userId);
-  }
 
   Future<void> _getEvents() async {
-    events = await profileController.getEvents(userId);
+    profileController.events = await profileController.getEvents(profileController.userId);
     setState((){
-      createdEvents = events;
+      profileController.createdEvents = profileController.events;
     });
   }
 
   Future<void> _getGifts() async {
-    gifts = await profileController.getPledgedGifts(userId);
+    profileController.gifts = await profileController.getPledgedGifts(profileController.userId);
     setState((){
-      pledgedGifts = gifts;
+      profileController.pledgedGifts = profileController.gifts;
     });
   }
 
   void _getUserName() async{
-    userName = await profileController.getUserName(userId) as String;
+    profileController.userName = await profileController.getUserName(profileController.userId) as String;
   }
 
   void _getEmail() async{
-    userEmail = await profileController.getEmail(userId) as String;
+    profileController.userEmail = await profileController.getEmail(profileController.userId) as String;
   }
 
   _fetchUserData() async {
-    userData = await profileController.getUserData(userId);
+    profileController.userData = await profileController.getUserData(profileController.userId);
     setState(() {
-      profileController.nameController.text = userData['name'] ?? '';
-      profileController.phoneController.text = userData['phone'] ?? '';
+      profileController.nameController.text = profileController.userData['name'] ?? '';
+      profileController.phoneController.text = profileController.userData['phone'] ?? '';
     });
   }
 
   _updateUserData() async {
-    int result = await profileController.updateUserData(userId);
+    int result = await profileController.updateUserData(profileController.userId);
     profileController.isEditingName = false;
     profileController.isEditingPhone = false;
     if (result > 0) {
@@ -124,7 +111,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     const SizedBox(height: 70),
                     Text(
-                      userName, // Display user name
+                      profileController.userName, // Display user name
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 40,
@@ -133,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      userEmail,
+                      profileController.userEmail,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 22,
@@ -143,7 +130,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 20),
                     CircleAvatar(
                       radius: 75,
-                      backgroundImage: AssetImage('assets/profile_pictures/$userId.jpg'),
+                      backgroundImage: AssetImage('assets/profile_pictures/${profileController.userId}.jpg'),
                     ),
                   ],
                 ),
@@ -294,12 +281,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(width: 20),
                   Switch(
-                    value: _isNotificationsEnabled,
+                    value: profileController.isNotificationsEnabled,
                     onChanged: (bool newValue) {
                       setState(() {
-                        _isNotificationsEnabled = newValue;
+                        profileController.isNotificationsEnabled = newValue;
                       });
-                      _saveNotificationPreference(newValue);
+                      profileController.saveNotificationPreference(newValue, profileController.userId);
                     },
                   ),
                 ],
@@ -318,7 +305,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => EventListPage(id: userId),
+                      builder: (context) => EventListPage(id: profileController.userId),
                     ),
                   );
                 },

@@ -1,5 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import '../controller/profile_controller.dart';
+import '../controller/friend_controller.dart';
 
 class FriendDetailsScreen extends StatefulWidget {
   final int friendId;
@@ -15,35 +16,56 @@ class FriendDetailsScreen extends StatefulWidget {
 
 class _FriendDetailsState extends State<FriendDetailsScreen> {
 
-  final ProfileController profileController = ProfileController();
+  final FriendController friendController = FriendController();
 
-  late Map<String, dynamic> friend;
-  late String userName = "";
-  late String eventName = "";
-  late int friendId;
-  late int currentUserId;
-  late List<Map<String, String>> gifts = [];
-  late List<Map<String, String>> userGifts = [];
 
   @override
   void initState(){
     super.initState();
-    friendId = widget.friendId;
-    currentUserId = widget.currentUserId;
-    friend = widget.friend;
+    friendController.friendId = widget.friendId;
+    friendController.currentUserId = widget.currentUserId;
+    friendController.friend = widget.friend;
     _getUserName();
     _getGifts();
   }
 
+  Widget _displayImage(String? imagePath) {
+    if (imagePath == null || imagePath.isEmpty) {
+      return const Icon(
+        Icons.card_giftcard, // Default icon if imagePath is null
+        size: 30,
+        color: Colors.white,
+      );
+    }
+
+    final File imageFile = File(imagePath);
+
+    if (imageFile.existsSync()) {
+      return Image.file(
+        imageFile,
+        fit: BoxFit.cover, // Ensures the image covers the circular area
+        width: 60, // Match the CircleAvatar's diameter
+        height: 60,
+      );
+    } else {
+      return const Icon(
+        Icons.broken_image, // Fallback icon if the file does not exist
+        size: 30,
+        color: Colors.white,
+      );
+    }
+  }
+
+
   Future<void> _getGifts() async {
-    gifts = await profileController.getUserGifts(friendId);
+    friendController.gifts = await friendController.getUserGifts(friendController.friendId);
     setState((){
-      userGifts = gifts;
+      friendController.userGifts = friendController.gifts;
     });
   }
 
   void _getUserName() async{
-    userName = await profileController.getUserName(currentUserId) as String;
+    friendController.userName = await friendController.getUserName(friendController.currentUserId) as String;
   }
 
 
@@ -112,7 +134,7 @@ class _FriendDetailsState extends State<FriendDetailsScreen> {
                             const SizedBox(height: 25),
                             CircleAvatar(
                               radius: 75,
-                              backgroundImage: AssetImage('assets/profile_pictures/$friendId.jpg'),
+                              backgroundImage: AssetImage('assets/profile_pictures/${friendController.friendId}.jpg'),
                             ),
                             const SizedBox(height: 10),
                             // Friend's Name in Colored Box
@@ -124,7 +146,7 @@ class _FriendDetailsState extends State<FriendDetailsScreen> {
                                 borderRadius: BorderRadius.circular(30),
                               ),
                               child: Text(
-                                friend['name'],
+                                friendController.friend['name'],
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 24,
@@ -149,14 +171,14 @@ class _FriendDetailsState extends State<FriendDetailsScreen> {
                   _buildDetailRow(
                     icon: Icons.phone,
                     label: "Phone",
-                    value: friend['phone'],
+                    value: friendController.friend['phone'],
                   ),
                   const SizedBox(height: 20),
                   _buildDetailRow(
                     icon: Icons.event,
                     label: "Upcoming Events",
-                    value: friend['events'] > 0
-                        ? "${friend['events']} Event(s)"
+                    value: friendController.friend['events'] > 0
+                        ? "${friendController.friend['events']} Event(s)"
                         : "No Upcoming Events",
                   ),
                 ],
@@ -168,7 +190,7 @@ class _FriendDetailsState extends State<FriendDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "${friend['name']}'s Gifts",
+                    "${friendController.friend['name']}'s Gifts",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -176,7 +198,7 @@ class _FriendDetailsState extends State<FriendDetailsScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  ...userGifts.map((gift) {
+                  ...friendController.userGifts.map((gift) {
                     // Determine the card color based on the status
                     Color cardColor;
                     switch (gift['status']) {
@@ -200,11 +222,10 @@ class _FriendDetailsState extends State<FriendDetailsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ListTile(
-                              leading: const CircleAvatar(
-                                backgroundColor: Color.fromRGBO(143, 148, 251, .6),
-                                child: Icon(
-                                  Icons.card_giftcard,
-                                  color: Colors.white,
+                              leading: CircleAvatar(
+                                backgroundColor: const Color.fromRGBO(143, 148, 251, .6),
+                                child: ClipOval(
+                                  child: _displayImage(gift['image_path']!),
                                 ),
                               ),
                               title: Text(
@@ -238,15 +259,16 @@ class _FriendDetailsState extends State<FriendDetailsScreen> {
                                         onChanged: (bool pledged) async {
                                           if (pledged) {
                                             // Mark as pledged
-                                            await profileController.updateGiftStatusFirebase(int.parse(gift['id']!), 'Pledged', int.parse(gift['event_id']!), true, userName);
-                                            await profileController.updateGiftStatusDB(int.parse(gift['id']!), 'Pledged', true);
+                                            await friendController.storeNotification(friendController.friendId.toString(), "${friendController.userName} pledged your gift ${gift['name']}");
+                                            await friendController.updateGiftStatusFirebase(int.parse(gift['id']!), 'Pledged', int.parse(gift['event_id']!), true, friendController.userName);
+                                            await friendController.updateGiftStatusDB(int.parse(gift['id']!), 'Pledged', true);
                                             setState(() {
                                               _getGifts();
                                             });
                                           } else {
                                             // Mark as available
-                                            await profileController.updateGiftStatusFirebase(int.parse(gift['id']!), 'Available', int.parse(gift['event_id']!),false, "");
-                                            await profileController.updateGiftStatusDB(int.parse(gift['id']!), 'Available', false);
+                                            await friendController.updateGiftStatusFirebase(int.parse(gift['id']!), 'Available', int.parse(gift['event_id']!),false, "");
+                                            await friendController.updateGiftStatusDB(int.parse(gift['id']!), 'Available', false);
                                             setState(() {
                                               _getGifts();
                                             });
@@ -269,15 +291,15 @@ class _FriendDetailsState extends State<FriendDetailsScreen> {
                                           if (gift['status'] == 'Pledged') {
                                             if (purchased) {
                                               // Mark as purchased
-                                              await profileController.updateGiftStatusFirebase(int.parse(gift['id']!), 'Purchased', int.parse(gift['event_id']!), true, userName);
-                                              await profileController.updateGiftStatusDB(int.parse(gift['id']!), 'Purchased', true);
+                                              await friendController.updateGiftStatusFirebase(int.parse(gift['id']!), 'Purchased', int.parse(gift['event_id']!), true, friendController.userName);
+                                              await friendController.updateGiftStatusDB(int.parse(gift['id']!), 'Purchased', true);
                                               setState(() {
                                                 _getGifts();
                                               });
                                             } else {
                                               // Mark as pledged (if they uncheck purchase)
-                                              await profileController.updateGiftStatusFirebase(int.parse(gift['id']!), 'Pledged', int.parse(gift['event_id']!), true, userName);
-                                              await profileController.updateGiftStatusDB(int.parse(gift['id']!), 'Pledged', true);
+                                              await friendController.updateGiftStatusFirebase(int.parse(gift['id']!), 'Pledged', int.parse(gift['event_id']!), true, friendController.userName);
+                                              await friendController.updateGiftStatusDB(int.parse(gift['id']!), 'Pledged', true);
                                               setState(() {
                                                 _getGifts();
                                               });

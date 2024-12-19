@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-// 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:project/controller/gift_controller.dart';
 
 
@@ -16,8 +16,6 @@ class _AddGiftPageState extends State<AddGiftPage> {
 
   GiftController giftController = GiftController();
 
-  File? _giftImage;
-
 
   void _addGift() {
 
@@ -30,24 +28,28 @@ class _AddGiftPageState extends State<AddGiftPage> {
         "price": giftController.priceController.text,
         "status": "Available",
         "pledged": false,
-        "imagePath": _giftImage,
+        "image_path": giftController.imagePath,
       };
 
       Navigator.pop(context, newGift);
     }
   }
 
-  // void _pickImage() async {
-  //   final ImagePicker picker = ImagePicker();
-  //   final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-  //
-  //   if (image != null) {
-  //     setState(() {
-  //       _giftImage = File(image.path);
-  //     });
-  //
-  //   }
-  // }
+  Future<String?> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+
+    if (image != null) {
+      final imagePath = image.path;
+      setState(() {
+        giftController.giftImage = File(imagePath);
+      });
+      return imagePath;
+    }
+    return null;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -96,29 +98,29 @@ class _AddGiftPageState extends State<AddGiftPage> {
                 key: giftController.formKey,
                 child: Column(
                   children: [
-                    // Row(
-                    //   children: [
-                    //     ElevatedButton(
-                    //       style: ElevatedButton.styleFrom(
-                    //         backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
-                    //       ),
-                    //       onPressed:() => _pickImage(),
-                    //       child: const Text(
-                    //         "Upload Image",
-                    //         style: TextStyle(color: Colors.white),
-                    //       ),
-                    //     ),
-                    //     const SizedBox(width: 10),
-                    //     _giftImage != null
-                    //         ? Image.file(
-                    //       _giftImage!,
-                    //       width: 50,
-                    //       height: 50,
-                    //     ) :
-                    //     const Text("No image selected"),
-                    //   ],
-                    // ),
-                    // const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
+                          ),
+                          onPressed:() async =>  giftController.imagePath = (await _pickImage())!,
+                          child: const Text(
+                            "Upload Image",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        giftController.giftImage != null
+                            ? Image.file(
+                          giftController.giftImage!,
+                          width: 50,
+                          height: 50,
+                        ) :
+                        const Text("No image selected"),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
                     TextFormField(
                       controller: giftController.nameController,
                       decoration: const InputDecoration(

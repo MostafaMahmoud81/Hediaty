@@ -48,7 +48,6 @@ class _EditEventPageState extends State<EditEventPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header Section
             Container(
               height: 300,
               decoration: const BoxDecoration(
@@ -137,7 +136,7 @@ class _EditEventPageState extends State<EditEventPage> {
                         DateTime? pickedDate = await showDatePicker(
                           context: context,
                           initialDate: DateTime.now(),
-                          firstDate: DateTime(1900),
+                          firstDate: DateTime.now(),
                           lastDate: DateTime(2100),
                         );
 
@@ -203,7 +202,7 @@ class _EditEventPageState extends State<EditEventPage> {
                             fontSize: 16,
                           ),
                         ),
-                        const SizedBox(width: 20), // Spacing between label and value
+                        const SizedBox(width: 20),
                         Container(
                           padding: const EdgeInsets.all(12.0),
                           decoration: BoxDecoration(
@@ -219,7 +218,6 @@ class _EditEventPageState extends State<EditEventPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Save Changes Button
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromRGBO(143, 148, 251, 1),

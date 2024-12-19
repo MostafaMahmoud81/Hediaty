@@ -77,6 +77,7 @@ class FirebaseService {
           'status': gift['status'],
           'event_id': gift['event_id'],
           'pledged': gift['pledged'],
+          'image_path': gift['image_path'],
           'user_id': userId,
           'event_name': eventName,
           'pledged_by': '',
@@ -112,6 +113,7 @@ class FirebaseService {
         'user_id': doc['user_id'].toString(),
         'event_name': doc['event_name'].toString(),
         'pledged_by': doc['pledged_by'].toString(),
+        'image_path': doc['image_path'].toString(),
       };
     }).toList();
 
@@ -143,6 +145,7 @@ class FirebaseService {
         'user_id': doc['user_id'].toString(),
         'event_name': doc['event_name'].toString(),
         'pledged_by': doc['pledged_by'].toString(),
+        'image_path': doc['image_path'].toString(),
       };
     }).toList();
 

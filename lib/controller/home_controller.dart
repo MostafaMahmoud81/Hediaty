@@ -9,6 +9,16 @@ class HomeController {
   final UserModel userModel = UserModel();
   final FriendModel friendModel = FriendModel();
 
+  late int userId;
+  late int friendId;
+
+  List<Map<String, dynamic>> friends = [];
+  List<Map<String, dynamic>> filteredFriends = [];
+
+
+  Future<void> showUnseenNotifications(String userId) async {
+    await userModel.showUnseenNotifications(userId);
+  }
 
   Future<List<Map<String, dynamic>>> getFriends(int id) async {
     List<Map<String, dynamic>> friends = await friendModel.getFriendsWithUpcomingEvents(id);

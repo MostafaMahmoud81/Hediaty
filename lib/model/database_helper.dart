@@ -1,4 +1,4 @@
-// import 'dart:io';
+import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -72,6 +72,7 @@ class DatabaseHelper {
         price REAL,
         status TEXT,
         event_id INTEGER NOT NULL,
+        image_path TEXT,
         pledged BOOLEAN DEFAULT 0,
         FOREIGN KEY(event_id) REFERENCES events(id) ON DELETE CASCADE
       );
@@ -84,6 +85,16 @@ class DatabaseHelper {
       PRIMARY KEY (user_id, friend_id),
       FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
       FOREIGN KEY(friend_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  ''');
+
+    await db.execute('''
+    CREATE TABLE IF NOT EXISTS Notifications(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId INTEGER,
+      message TEXT,
+      timestamp TEXT,
+      isSeen BOOLEAN DEFAULT 0
     )
   ''');
   }

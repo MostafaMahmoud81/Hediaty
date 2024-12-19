@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import '../services/firebase_service.dart';
 import 'database_helper.dart';
 
@@ -176,6 +179,191 @@ class UserModel {
   Future<void> signOut()async {
     await fireBase.signOut();
   }
+
+
+
+  Future<void> storeNotification(String userId, String message) async {
+    final notificationsCollection = FirebaseFirestore.instance.collection('notifications');
+
+    await notificationsCollection.add({
+      'userId': userId,
+      'message': message,
+      'timestamp': FieldValue.serverTimestamp(),
+      'isSeen': false,
+    });
+  }
+
+  Future<void> showUnseenNotifications(String userId) async {
+    final notificationsCollection = FirebaseFirestore.instance.collection('notifications');
+
+    // Query unseen notifications for the specific user
+    final querySnapshot = await notificationsCollection
+        .where('userId', isEqualTo: userId)
+        .where('isSeen', isEqualTo: false)
+        .get();
+
+    for (var doc in querySnapshot.docs) {
+      final notification = doc.data();
+
+      // Get notification ID and message
+      final String notificationId = doc.id;
+      final String message = notification['message'] as String;
+
+      // Show the notification
+      await showLocalNotification(message);
+
+      // Mark the notification as seen
+      await markNotificationAsSeen(notificationId);
+    }
+  }
+
+  Future<void> markNotificationAsSeen(String notificationId) async {
+    final notificationsCollection = FirebaseFirestore.instance.collection('notifications');
+
+    await notificationsCollection.doc(notificationId).update({
+      'isSeen': true,
+    });
+  }
+
+  static Future showLocalNotification(String msg) async {
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+    var androidInitialize = const AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initializationSettings = InitializationSettings(
+        android: androidInitialize);
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    print("hi");
+
+    var androidDetails = const AndroidNotificationDetails(
+      'channel_id',
+      'channel_name',
+      channelDescription: 'This is a notification channel',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    var platformDetails = NotificationDetails(android: androidDetails);
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'New Notification',
+      msg,
+      platformDetails,
+      payload: 'Notification Payload',
+    );
+  }
+
+
+  // Future<void> showLocalNotification(int notificationId, String message) async {
+  //
+  //   // final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  //   // FlutterLocalNotificationsPlugin();
+  //   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  //   FlutterLocalNotificationsPlugin();
+  //
+  //   const AndroidInitializationSettings initializationSettingsAndroid =
+  //   AndroidInitializationSettings('@mipmap/ic_launcher');
+  //
+  //   const InitializationSettings initializationSettings =
+  //   InitializationSettings(android: initializationSettingsAndroid);
+  //
+  //   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  //
+  //
+  //   print("joee");
+  //
+  //   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+  //     'user_action_channel',
+  //     'User Actions',
+  //     channelDescription: 'Notifications for user actions',
+  //     importance: Importance.high,
+  //     priority: Priority.high,
+  //   );
+  //   const NotificationDetails notificationDetails =
+  //   NotificationDetails(android: androidDetails);
+  //
+  //   await flutterLocalNotificationsPlugin.show(
+  //     notificationId,
+  //     'New Notification',
+  //     message,
+  //     notificationDetails,
+  //   );
+  // }
+
+
+
+
+
+// Future<void> storeNotification(int userId, String message) async {
+  //   final db = await dbHelper.database;
+  //   await db.insert('Notifications', {
+  //     'userId': userId,
+  //     'message': message,
+  //     'timestamp': DateTime.now().toString(),
+  //     'isSeen': 0,
+  //   });
+  // }
+  //
+  // Future<void> showUnseenNotifications(int userId) async {
+  //   final db = await dbHelper.database;
+  //
+  //   // Query unseen notifications for the specific user
+  //   final notifications = await db.query(
+  //     'Notifications',
+  //     where: 'isSeen = ? AND userId = ?',
+  //     whereArgs: [0, userId],
+  //   );
+  //
+  //   for (var notification in notifications) {
+  //     // Explicitly cast 'id' to an int
+  //     final int notificationId = notification['id'] as int;
+  //
+  //     // Ensure 'message' is cast to String
+  //     final String message = notification['message'].toString();
+  //
+  //     // Show the notification
+  //     await showLocalNotification(notificationId, message);
+  //
+  //     // Mark the notification as seen
+  //     await markNotificationAsSeen(notificationId);
+  //   }
+  // }
+  //
+  //
+  //
+  // Future<void> markNotificationAsSeen(int notificationId) async {
+  //   final db = await dbHelper.database;
+  //   await db.update(
+  //     'Notifications',
+  //     {'isSeen': 1},
+  //     where: 'id = ?',
+  //     whereArgs: [notificationId],
+  //   );
+  // }
+  //
+  // Future<void> showLocalNotification(int notificationId, String message) async {
+  //   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  //   FlutterLocalNotificationsPlugin();
+  //
+  //   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+  //     'user_action_channel',
+  //     'User Actions',
+  //     channelDescription: 'Notifications for user actions',
+  //     importance: Importance.high,
+  //     priority: Priority.high,
+  //   );
+  //   const NotificationDetails notificationDetails =
+  //   NotificationDetails(android: androidDetails);
+  //
+  //   await flutterLocalNotificationsPlugin.show(
+  //     notificationId,
+  //     'New Notification',
+  //     message,
+  //     notificationDetails,
+  //   );
+  // }
+
+
 
 }
 

@@ -2,49 +2,6 @@ import 'package:sqflite/sqflite.dart';
 
 import 'database_helper.dart';
 
-class Gift {
-  int? id;
-  String name;
-  String? description;
-  String? category;
-  double? price;
-  String status;
-  int eventId;
-
-  Gift({
-    this.id,
-    required this.name,
-    this.description,
-    this.category,
-    this.price,
-    required this.status,
-    required this.eventId,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'category': category,
-      'price': price,
-      'status': status,
-      'event_id': eventId,
-    };
-  }
-
-  factory Gift.fromMap(Map<String, dynamic> map) {
-    return Gift(
-      id: map['id'],
-      name: map['name'],
-      description: map['description'],
-      category: map['category'],
-      price: map['price'],
-      status: map['status'],
-      eventId: map['event_id'],
-    );
-  }
-}
 
 class GiftModel {
   final dbHelper = DatabaseHelper();
@@ -62,6 +19,7 @@ class GiftModel {
         'status': newGift['status'],
         'pledged': newGift['pledged'] ? 1 : 0, // Convert boolean to integer
         'event_id': eventId, // Ensure eventId is passed when calling the function
+        'image_path': newGift['image_path']
       },
       conflictAlgorithm: ConflictAlgorithm.replace, // Handle duplicates if needed
     );
@@ -80,7 +38,8 @@ class GiftModel {
       price, 
       status, 
       pledged,
-      event_id 
+      event_id,
+      image_path 
     FROM gifts
     WHERE event_id = ?
   ''';
@@ -99,6 +58,7 @@ class GiftModel {
         'status': gift['status'],
         'pledged': (gift['pledged'] as int) == 1,
         'event_id': gift['event_id'],
+        'image_path': gift['image_path']
       };
     }).toList();
 

@@ -14,40 +14,60 @@ class EventListPage extends StatefulWidget {
 
 
 class _EventListPageState extends State<EventListPage> {
-  late int userId;
-  String _sortCriteria = "Name";
+
   final EventController eventController = EventController();
-  List<Map<String, dynamic>> events = [];
 
   @override
   void initState(){
     super.initState();
-    userId = widget.id;
+    eventController.userId = widget.id;
     _getEvents();
   }
 
   Future<void> _getEvents() async {
-    List<Map<String, dynamic>> getEvents = await eventController.getUserEvents(userId);
-    setState((){
-      events = getEvents;
+    List<Map<String, dynamic>> getEvents = await eventController.getUserEvents(eventController.userId);
+
+    // Get the current date
+    DateTime currentDate = DateTime.now();
+
+    // Loop through each event and check the date
+    setState(() {
+      eventController.events = getEvents.map((event) {
+        // Parse the event date (assuming the event date is in a string format, e.g., "yyyy-MM-dd")
+        DateTime eventDate = DateTime.parse(event['date']);
+
+        // Calculate the difference between the event date and the current date
+        Duration difference = eventDate.difference(currentDate);
+
+        // Set the status based on the event date
+        if (eventDate.isBefore(currentDate)) {
+          event['status'] = 'Past'; // Event is in the past
+        } else if (difference.inDays <= 3) {
+          event['status'] = 'Current'; // Event is within the next 3 days
+        } else {
+          event['status'] = 'Upcoming'; // Event is beyond 3 days
+        }
+
+        return event;
+      }).toList();
     });
   }
 
   void _sortEvents(String criteria) {
     setState(() {
-      _sortCriteria = criteria;
+      eventController.sortCriteria = criteria;
 
       if (criteria == "Name") {
-        events.sort((a, b) => a["name"]!.compareTo(b["name"]!));
+        eventController.events.sort((a, b) => a["name"]!.compareTo(b["name"]!));
       } else if (criteria == "Category") {
-        events.sort((a, b) => a["category"]!.compareTo(b["category"]!));
+        eventController.events.sort((a, b) => a["category"]!.compareTo(b["category"]!));
       } else if (criteria == "Status") {
         Map<String, int> statusOrder = {
           "Upcoming": 1,
           "Current": 2,
           "Past": 3,
         };
-        events.sort((a, b) => statusOrder[a["status"]!]!.compareTo(statusOrder[b["status"]!]!));
+        eventController.events.sort((a, b) => statusOrder[a["status"]!]!.compareTo(statusOrder[b["status"]!]!));
       }
     });
   }
@@ -99,7 +119,7 @@ class _EventListPageState extends State<EventListPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   DropdownButton<String>(
-                    value: _sortCriteria,
+                    value: eventController.sortCriteria,
                     items: ["Name", "Category", "Status"]
                         .map((criteria) => DropdownMenuItem(
                       value: criteria,
@@ -124,7 +144,7 @@ class _EventListPageState extends State<EventListPage> {
                       );
 
                       if (newEvent != null) {
-                        eventController.addEvent(newEvent, userId);
+                        eventController.addEvent(newEvent, eventController.userId);
                         setState(() {
                           _getEvents();
                         });
@@ -142,7 +162,7 @@ class _EventListPageState extends State<EventListPage> {
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
-                children: events.map((event) {
+                children: eventController.events.map((event) {
                   return Card(
                     elevation: 5,
                     margin: const EdgeInsets.symmetric(vertical: 10),

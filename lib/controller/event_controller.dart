@@ -22,6 +22,13 @@ class EventController {
 
   final editFormKey = GlobalKey<FormState>();
 
+
+  late int userId;
+  String sortCriteria = "Name";
+  List<Map<String, dynamic>> events = [];
+
+
+
   final EventModel eventModel = EventModel();
 
   Future<List<Map<String, dynamic>>> getUserEvents(int id) async {

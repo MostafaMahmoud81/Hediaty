@@ -18,6 +18,19 @@ class ProfileController {
   bool isEditingName = false;
   bool isEditingPhone = false;
 
+
+  bool isNotificationsEnabled = true;
+
+  late int userId;
+  late String userName = "";
+  late String userEmail = "";
+  late List<Map<String, String>> events = [];
+  late List<Map<String, String>> createdEvents = [];
+  late List<Map<String, String>> gifts = [];
+  late List<Map<String, String>> pledgedGifts = [];
+  Map<String, String> userData = {};
+
+
   String? validateName(String? value) {
     if (value == null || value.isEmpty) {
       return "Please enter your name";
@@ -68,10 +81,6 @@ class ProfileController {
     return gifts;
   }
 
-  Future<List<Map<String, String>>> getUserGifts(int id) async {
-    List<Map<String, String>> gifts = await firebaseService.getGiftsByUserId(id);
-    return gifts;
-  }
 
   Future<Map<String, String>> getUserData(int userId) async {
     final Map<String, String> result = await userModel.getUserData(userId);
@@ -93,14 +102,6 @@ class ProfileController {
 
   void saveNotificationPreference(bool isEnabled, int userId) async{
     await sharedPrefrence.saveNotificationPreference(isEnabled, userId);
-  }
-
-  Future<void> updateGiftStatusDB(int giftId, String status, bool pledged) async{
-    await giftModel.updateGiftStatus(giftId, status, pledged);
-  }
-
-  Future<void> updateGiftStatusFirebase(int giftId, String status, int eventId, bool pledged, String friendName) async{
-    await firebaseService.updateGiftStatus(giftId, status, eventId, pledged, friendName);
   }
 
 

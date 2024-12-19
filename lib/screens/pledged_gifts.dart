@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project/controller/gift_controller.dart';
-
+import '../controller/pledged_gifts_controller.dart';
 import 'edit_gift.dart';
 
 class PledgedGiftsPage extends StatefulWidget {
@@ -13,48 +12,23 @@ class PledgedGiftsPage extends StatefulWidget {
 
 class _PledgedGiftsPageState extends State<PledgedGiftsPage> {
 
-  late int userId;
-  GiftController giftController = GiftController();
-  List<Map<String, dynamic>> pledgedGifts = [];
-
-  // List<Map<String, dynamic>> pledgedGifts = [
-  //   {
-  //     "name": "Toy Car",
-  //     "friend": "John Doe",
-  //     "dueDate": "2024-12-25",
-  //     "status": "Pending",
-  //   },
-  //   {
-  //     "name": "Laptop",
-  //     "friend": "Jane Smith",
-  //     "dueDate": "2025-01-10",
-  //     "status": "Pending",
-  //   },
-  //   {
-  //     "name": "Watch",
-  //     "friend": "Alice Johnson",
-  //     "dueDate": "2024-11-30",
-  //     "status": "Completed",
-  //   },
-  // ];
-
+  PledgedGiftsController pledgedGiftsController = PledgedGiftsController();
 
   @override
   void initState(){
     super.initState();
-    userId = widget.userId;
-    _getGifts(userId);
+    pledgedGiftsController.userId = widget.userId;
+    _getGifts(pledgedGiftsController.userId);
   }
 
   void _getGifts(int userId) async{
-    List<Map<String, dynamic>> gifts = await giftController.getPledgedGifts(userId);
+    List<Map<String, dynamic>> gifts = await pledgedGiftsController.getPledgedGifts(userId);
     setState((){
-      pledgedGifts = gifts;
+      pledgedGiftsController.pledgedGifts = gifts;
     });
   }
 
   void _modifyGift(Map<String, dynamic> gift) {
-    // Navigate to the gift details page to modify the pledge
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -62,7 +36,6 @@ class _PledgedGiftsPageState extends State<PledgedGiftsPage> {
       ),
     );
   }
-
 
 
   @override
@@ -108,8 +81,8 @@ class _PledgedGiftsPageState extends State<PledgedGiftsPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
               child: Column(
-                children: pledgedGifts.isNotEmpty
-                    ? pledgedGifts.map((gift) {
+                children: pledgedGiftsController.pledgedGifts.isNotEmpty
+                    ? pledgedGiftsController.pledgedGifts.map((gift) {
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                     elevation: 5,

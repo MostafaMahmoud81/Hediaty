@@ -18,19 +18,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  late int userId;
-  late int friendId;
   final HomeController homeController = HomeController();
-
-  List<Map<String, dynamic>> friends = [];
-  List<Map<String, dynamic>> filteredFriends = [];
 
   @override
   void initState(){
     super.initState();
-    userId = widget.id;
+    homeController.userId = widget.id;
+    _getNotification();
     _getFriends();
-    filteredFriends = friends;
+    homeController.filteredFriends = homeController.friends;
   }
 
   @override
@@ -40,17 +36,23 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  Future<void> _getNotification() async{
+    setState(() {
+      homeController.showUnseenNotifications(homeController.userId.toString());
+    });
+  }
+
   Future<void> _getFriends() async {
-    friends = await homeController.getFriends(userId);
+    homeController.friends = await homeController.getFriends(homeController.userId);
     setState((){
-      filteredFriends = friends;
+      homeController.filteredFriends = homeController.friends;
     });
   }
 
   void _filterFriends(String query) {
     query.toLowerCase();
     setState(() {
-      filteredFriends = friends.where((friend) {
+      homeController.filteredFriends = homeController.friends.where((friend) {
         String name = friend['name']!.toLowerCase();
         String phone = friend['phone']!;
         return name.contains(query) || phone.contains(query);
@@ -62,10 +64,10 @@ class _HomePageState extends State<HomePage> {
     int? friendId = await homeController.userModel.getUserIdByPhone(phoneNumber);
 
     if (friendId != null) {
-      Future<int> result = homeController.addFriend(userId, friendId);
+      Future<int> result = homeController.addFriend(homeController.userId, friendId);
       if(result.toString() != (-1).toString()) {
         _getFriends();
-        filteredFriends = friends;
+        homeController.filteredFriends = homeController.friends;
       }
       else{
         _showSnackbar(context, 'Friend could not be added. Please check the phone number.');
@@ -74,7 +76,7 @@ class _HomePageState extends State<HomePage> {
       _showSnackbar(context, 'Friend could not be added. Please check the phone number.');
     }
     setState((){
-      filteredFriends = friends;
+      homeController.filteredFriends = homeController.friends;
     });
   }
 
@@ -200,7 +202,7 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => EventListPage(id: userId),
+                              builder: (context) => EventListPage(id: homeController.userId),
                             ),
                           );
                         },
@@ -351,9 +353,9 @@ class _HomePageState extends State<HomePage> {
                     child: ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: filteredFriends.length,
+                      itemCount: homeController.filteredFriends.length,
                       itemBuilder: (context, index) {
-                        final friend = filteredFriends[index];
+                        final friend = homeController.filteredFriends[index];
                         return Card(
                           elevation: 5,
                           margin: const EdgeInsets.symmetric(vertical: 10),
@@ -392,7 +394,7 @@ class _HomePageState extends State<HomePage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => FriendDetailsScreen(friend: friend, friendId: friend['friendId'], currentUserId: userId,),
+                                  builder: (context) => FriendDetailsScreen(friend: friend, friendId: friend['friendId'], currentUserId: homeController.userId,),
                                 ),
                               );
                             },
@@ -415,7 +417,7 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ProfilePage(id: userId),
+              builder: (context) => ProfilePage(id: homeController.userId),
             ),
           );
         },
@@ -423,5 +425,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
-

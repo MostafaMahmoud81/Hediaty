@@ -1,8 +1,8 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:project/model/event_model.dart';
 import 'package:project/services/firebase_service.dart';
 import '../model/gift_model.dart';
-import '../model/shared_prefrence.dart';
 
 
 class GiftController {
@@ -28,7 +28,17 @@ class GiftController {
   final formKey = GlobalKey<FormState>();
 
   GiftModel giftModel = GiftModel();
-  final SharedPrefrence sharedPrefrence = SharedPrefrence();
+
+
+  List<Map<String, dynamic>> gifts = [];
+  List<Map<String, dynamic>> filteredGifts = [];
+  late int eventId;
+  late String eventName;
+  String sortCriteria = "Name";
+  late int userId;
+
+  File? giftImage;
+  late String imagePath;
 
   Future<List<Map<String, dynamic>>> getEventGifts(int id) async {
     List<Map<String, dynamic>> events = await giftModel.getGiftsForEvent(id);
@@ -59,26 +69,6 @@ class GiftController {
   Future<void> storeGiftsToFirebase(List<Map<String, dynamic>> gifts, int userId, String eventName) async{
     await firebaseService.syncGiftsWithFirebase(gifts, userId, eventName);
   }
-
-
-  Future<List<Map<String, String>>> getPledgedGifts(int userId) async {
-
-      // Step 1: Fetch all gifts for the user from Firestore
-      List<Map<String, String>> gifts = await firebaseService.getPledgedGiftsByUserId(userId);
-
-      // Step 2: Iterate through the gifts and add the event_date for each
-      for (var gift in gifts) {
-        String eventId = gift['event_id']!;
-
-          // Fetch the event date from the SQLite database
-          String eventDate = await eventModel.getEventDateById(int.parse(eventId));
-          gift['due_date'] = eventDate; // Add event_date to the gift data
-
-      }
-      return gifts; // Return the combined list
-
-  }
-
 
 
 }
