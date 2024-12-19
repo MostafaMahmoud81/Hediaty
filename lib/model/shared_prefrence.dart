@@ -23,32 +23,4 @@ class SharedPrefrence {
     await prefs.setBool('notifications_$userId', isEnabled);
   }
 
-
-  // Future<void> saveImagePathForGift(String imagePath, String giftId) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //
-  //   Map<String, String> giftImages = {};
-  //   String? savedData = prefs.getString('gift_images');
-  //   if (savedData != null) {
-  //     giftImages = Map<String, String>.from(json.decode(savedData));
-  //   }
-  //
-  //   giftImages[giftId] = imagePath;
-  //
-  //   await prefs.setString('gift_images', json.encode(giftImages));
-  // }
-  //
-  //
-  // Future<String?> loadImagePathForGift(String giftId) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //
-  //   String? savedData = prefs.getString('gift_images');
-  //
-  //     Map<String, String> giftImages = Map<String, String>.from(json.decode(savedData!));
-  //     return giftImages[giftId];
-  //
-  // }
-
-
-
 }

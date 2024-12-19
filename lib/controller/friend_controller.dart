@@ -1,6 +1,7 @@
 import '../model/gift_model.dart';
 import '../model/user_model.dart';
 import '../services/firebase_service.dart';
+import '../services/notification.dart';
 
 class FriendController {
 
@@ -42,6 +43,6 @@ class FriendController {
   }
 
   Future<void> storeNotification(String userId, String message) async {
-    await userModel.storeNotification(userId, message);
+    await LocalNotification.saveNotificationForUser(userId, message);
   }
 }

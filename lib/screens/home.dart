@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:project/screens/event_list.dart';
 import 'package:project/screens/profile.dart';
 import 'package:project/screens/login.dart';
 import '../controller/home_controller.dart';
+import '../services/notification.dart';
 import 'friend_details.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
 
 
 class HomePage extends StatefulWidget {
@@ -20,13 +25,16 @@ class _HomePageState extends State<HomePage> {
 
   final HomeController homeController = HomeController();
 
+
   @override
   void initState(){
     super.initState();
+    LocalNotification.initialize(flutterLocalNotificationsPlugin);
     homeController.userId = widget.id;
-    _getNotification();
+    _loadNotificationPreference();
     _getFriends();
     homeController.filteredFriends = homeController.friends;
+    _getNotification();
   }
 
   @override
@@ -36,10 +44,17 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  Future<void> _getNotification() async{
-    setState(() {
-      homeController.showUnseenNotifications(homeController.userId.toString());
-    });
+  void _loadNotificationPreference() async {
+    bool isEnabled = await homeController.loadNotificationPreference(homeController.userId);
+    homeController.isNotificationsEnabled = isEnabled;
+
+  }
+
+  Future<void> _getNotification() async {
+    if (homeController.isNotificationsEnabled) {
+      await homeController.showUnseenNotifications(
+          homeController.userId.toString(), flutterLocalNotificationsPlugin);
+    }
   }
 
   Future<void> _getFriends() async {

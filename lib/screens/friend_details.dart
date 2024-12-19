@@ -291,15 +291,9 @@ class _FriendDetailsState extends State<FriendDetailsScreen> {
                                           if (gift['status'] == 'Pledged') {
                                             if (purchased) {
                                               // Mark as purchased
+                                              await friendController.storeNotification(friendController.friendId.toString(), "${friendController.userName} purchased your gift ${gift['name']}");
                                               await friendController.updateGiftStatusFirebase(int.parse(gift['id']!), 'Purchased', int.parse(gift['event_id']!), true, friendController.userName);
                                               await friendController.updateGiftStatusDB(int.parse(gift['id']!), 'Purchased', true);
-                                              setState(() {
-                                                _getGifts();
-                                              });
-                                            } else {
-                                              // Mark as pledged (if they uncheck purchase)
-                                              await friendController.updateGiftStatusFirebase(int.parse(gift['id']!), 'Pledged', int.parse(gift['event_id']!), true, friendController.userName);
-                                              await friendController.updateGiftStatusDB(int.parse(gift['id']!), 'Pledged', true);
                                               setState(() {
                                                 _getGifts();
                                               });
