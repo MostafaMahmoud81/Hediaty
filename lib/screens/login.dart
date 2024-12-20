@@ -118,6 +118,7 @@ class LoginPage extends StatelessWidget {
                   children: <Widget>[
                     // Email Field
                     TextFormField(
+                      key: const Key('login_email'),
                       controller: loginController.emailController,
                       validator: loginController.validateEmail,
                       decoration: InputDecoration(
@@ -128,6 +129,7 @@ class LoginPage extends StatelessWidget {
                     const SizedBox(height: 10),
                     // Password Field
                     TextFormField(
+                      key: const Key('login_password'),
                       controller: loginController.passwordController,
                       validator: loginController.validatePassword,
                       obscureText: true,
@@ -139,6 +141,7 @@ class LoginPage extends StatelessWidget {
                     const SizedBox(height: 30),
                     // Login Button
                     GestureDetector(
+                      key: const Key('login_button'),
                       onTap: () async {
                         if (loginController.formKey.currentState!.validate()) {
                           final success = await loginController.login();
@@ -181,6 +184,7 @@ class LoginPage extends StatelessWidget {
                     const SizedBox(height: 30),
                     // Sign Up Link
                     GestureDetector(
+                      key: const Key("Don't have an account? Sign Up"),
                       onTap: () {
                         Navigator.push(
                           context,

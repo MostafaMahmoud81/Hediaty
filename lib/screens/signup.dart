@@ -124,6 +124,7 @@ class SignUpPage extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(8.0),
                               child: TextFormField(
+                                key: const Key('signup_name'),
                                 controller: controller.nameController,
                                 validator: controller.validateName,
                                 decoration: InputDecoration(
@@ -136,6 +137,7 @@ class SignUpPage extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(8.0),
                               child: TextFormField(
+                                key: const Key('signup_email'),
                                 controller: controller.emailController,
                                 validator: controller.validateEmail,
                                 decoration: InputDecoration(
@@ -148,6 +150,7 @@ class SignUpPage extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(8.0),
                               child: TextFormField(
+                                key: const Key('signup_phone'),
                                 controller: controller.phoneController,
                                 validator: controller.validatePhoneNumber,
                                 decoration: InputDecoration(
@@ -160,6 +163,7 @@ class SignUpPage extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(8.0),
                               child: TextFormField(
+                                key: const Key('signup_password'),
                                 controller: controller.passwordController,
                                 obscureText: true,
                                 validator: controller.validatePassword,
@@ -173,6 +177,7 @@ class SignUpPage extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(8.0),
                               child: TextFormField(
+                                key:const Key('signup_confirm_password'),
                                 controller: controller.confirmPasswordController,
                                 obscureText: true,
                                 validator: controller.validateConfirmPassword,
@@ -191,6 +196,7 @@ class SignUpPage extends StatelessWidget {
                     FadeInUp(
                       duration: const Duration(milliseconds: 1900),
                       child: GestureDetector(
+                        key:  const Key('signup_button'),
                         onTap: () async {
                           if (controller.formKey.currentState!.validate()) {
                             final success = await controller.signUp();

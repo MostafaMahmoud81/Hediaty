@@ -286,6 +286,7 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Expanded(
                           child: TextField(
+                            key: const Key('add_friend_phone'),
                             controller: homeController.phoneController,
                             decoration: InputDecoration(
                               hintText: "Enter Phone Number",
@@ -299,6 +300,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                         const SizedBox(width: 10),
                         ElevatedButton(
+                          key: const Key('add_friend_button'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color.fromRGBO(143, 148, 251, 1),
                             shape: RoundedRectangleBorder(
